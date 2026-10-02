@@ -579,7 +579,7 @@ window.AUDIO_DATA = {"s1-01": {"html": "*PRE*-sent (a gift) &nbsp;/&nbsp; pre-*S
 (function(){
 'use strict';
 /* ---------- config ---------- */
-var AUDIO_BASE = '';          // flat at the repo root
+var AUDIO_BASE = 'audio/';     // audio folder next to index.html
 var AUDIO_PREFIX = 'pron-';   // e.g. pron-s1-01
 var AUDIO_EXT = '.m4a';       // your recorder saves m4a
 var A = window.AUDIO_DATA;
@@ -605,6 +605,7 @@ function getAudio(id){
   if(!cache[id]){var a=new Audio(AUDIO_BASE+AUDIO_PREFIX+id+AUDIO_EXT);a.preload='none';cache[id]=a}
   return cache[id];
 }
+function failMsg(a,e){var p=(a.src||'').replace(location.origin,'');return 'Could not play '+p+(a.error?' (file not found or not supported)':' ('+((e&&e.name)||'blocked by browser')+')')}
 function bindPlayer(btn,audio,bar,row){
   function setState(p){btn.classList.toggle('playing',p);btn.setAttribute('aria-label',p?'Pause':'Play')}
   btn.addEventListener('click',function(){
@@ -612,7 +613,7 @@ function bindPlayer(btn,audio,bar,row){
       if(current&&current!==audio)current.pause();
       current=audio;
       var pr=audio.play();
-      if(pr&&pr.catch)pr.catch(function(){ if(row)row.classList.add('missing'); toast('This audio is not uploaded yet.'); setState(false) });
+      if(pr&&pr.catch)pr.catch(function(e){ if(row)row.classList.add('missing'); toast(failMsg(audio,e)); setState(false) });
     }else{audio.pause()}
   });
   audio.addEventListener('play',function(){setState(true)});
@@ -903,7 +904,7 @@ function initTabs(){
   function show(name){
     $$('.tab').forEach(function(t){t.setAttribute('aria-selected',t.getAttribute('data-tab')===name?'true':'false')});
     $$('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+name)});
-    window.scrollTo({top:$('.tabs').offsetTop,behavior:'auto'});
+    window.scrollTo({top:$('.hero').offsetHeight,behavior:'auto'});
   }
   $$('.tab').forEach(function(t){t.addEventListener('click',function(){show(t.getAttribute('data-tab'))})});
   $$('[data-goto]').forEach(function(b){b.addEventListener('click',function(){show(b.getAttribute('data-goto'))})});
